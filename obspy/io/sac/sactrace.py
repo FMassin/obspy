@@ -69,116 +69,109 @@ Read/write SAC files
 Build a SACTrace from a header dictionary and data array
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: python
+.. rubric:: Example
 
-    header = {'kstnm': 'ANMO', 'kcmpnm': 'BHZ', 'stla': 40.5, 'stlo': -108.23,
-              'evla': -15.123, 'evlo': 123, 'evdp': 50, 'nzyear': 2012,
-              'nzjday': 123, 'nzhour': 13, 'nzmin': 43, 'nzsec': 17,
+>>> header = {'kstnm': 'ANMO', 'kcmpnm': 'BHZ', 'stla': 40.5, 'stlo': -108.23,\
+              'evla': -15.123, 'evlo': 123, 'evdp': 50, 'nzyear': 2012,\
+              'nzjday': 123, 'nzhour': 13, 'nzmin': 43, 'nzsec': 17,\
               'nzmsec': 100, 'delta': 1.0/40}
-    sac = SACTrace(data=my_array, **header)
+>>> sac = SACTrace(data=np.random.random(100), **header)
+>>> sac
+SACTrace(nzyear=2012, delta=0.025, nzsec=17, iztype=9, evla=-15.123, \
+nzhour=13, lcalda=0, evlo=123.0, iftype=1, nvhdr=6, kcmpnm=u'BHZ', nzjday=123,\
+ internal0=2.0, lovrok=1, npts=0, e=0.0, nzmsec=100, lpspol=1, b=0.0, \
+stla=40.5, leven=1, stlo=-108.23, kstnm=u'ANMO', nzmin=43, evdp=50.0)
 
 
 Reference-time and relative time headers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: python
+.. rubric:: Example
 
-    sac = SACTrace(nzyear=2000, nzjday=1, nzhour=0, nzmin=0, nzsec=0, nzmsec=0,
-                   t1=23.5, data=numpy.arange(100))
+>>> sac = SACTrace(nzyear=2000, nzjday=1, nzhour=0, nzmin=0, nzsec=0, \
+                   nzmsec=0, t1=23.5, data=np.arange(100))
+>>> print(sac.reftime)
+2000-01-01T00:00:00.000000Z
 
-    sac.reftime
-    sac.b, sac.e, sac.t1
-
-::
-
-    2000-01-01T00:00:00.000000Z
-    (0.0, 99.0, 23.5)
+>>> sac.b, sac.e, sac.t1
+(0.0, 99.0, 23.5)
 
 Move reference time by relative seconds, relative time headers are
 preserved.
 
-.. code:: python
+.. rubric:: Example
 
-    sac.reftime -= 2.5
-    sac.b, sac.e, sac.t1
-
-::
-
-    (2.5, 101.5, 26.0)
+>>> sac = SACTrace(nzyear=2000, nzjday=1, nzhour=0, nzmin=0, nzsec=0, \
+                   nzmsec=0, t1=23.5, data=np.arange(100))
+>>> sac.reftime -= 2.5
+>>> sac.b, sac.e, sac.t1
+(2.5, 101.5, 26.0)
 
 Set reference time to new absolute time, relative time headers are
 preserved.
 
-.. code:: python
+.. rubric:: Example
 
-    sac.reftime = UTCDateTime(2000, 1, 1, 0, 2, 0, 0)
-    sac.b, sac.e
-
-::
-
-    (-120.0, -21.0, -96.5)
+>>> sac = SACTrace(nzyear=2000, nzjday=1, nzhour=0, nzmin=0, nzsec=0, \
+                   nzmsec=0, t1=23.5, data=np.arange(100))
+>>> # set the reftime two minutes later
+>>> sac.reftime = UTCDateTime(2000, 1, 1, 0, 2, 0, 0)
+>>> sac.b, sac.e, sac.t1
+(-120.0, -21.0, -96.5)
 
 Quick header viewing
 ~~~~~~~~~~~~~~~~~~~~
 
 Print non-null header values.
 
-.. code:: python
+.. rubric:: Example
 
-    sac = SACTrace()
-    print sac
-
-::
-
-    Reference Time = 01/01/2000 (001) 00:00:00.000000
-        iztype IB: begin time
-    b          = 0.0
-    cmpaz      = 0.0
-    cmpinc     = 0.0
-    delta      = 1.0
-    e          = 99.0
-    iftype     = itime
-    internal0  = 2.0
-    iztype     = ib
-    kcmpnm     = Z
-    lcalda     = False
-    leven      = True
-    lovrok     = True
-    lpspol     = True
-    npts       = 100
-    nvhdr      = 6
-    nzhour     = 0
-    nzjday     = 1
-    nzmin      = 0
-    nzmsec     = 0
-    nzsec      = 0
-    nzyear     = 2000
+>>> sac = SACTrace()
+>>> print(sac) # doctest: +SKIP
+Reference Time = 01/01/1970 (001) 00:00:00.000000
+	iztype IB: begin time
+b          = 0.0
+delta      = 1.0
+e          = 0.0
+iftype     = itime
+internal0  = 2.0
+iztype     = ib
+lcalda     = False
+leven      = True
+lovrok     = True
+lpspol     = True
+npts       = 0
+nvhdr      = 6
+nzhour     = 0
+nzjday     = 1
+nzmin      = 0
+nzmsec     = 0
+nzsec      = 0
+nzyear     = 1970
 
 Print relative time header values.
 
-.. code:: python
+.. rubric:: Example
 
-    sac.lh('picks')
-
-::
-
-    Reference Time = 01/01/1970 (001) 00:00:00.000000
-        iztype IB: begin time
-        a          = None
-        b          = 0.0
-        e          = 0.0
-        f          = None
-        o          = None
-        t0         = None
-        t1         = None
-        t2         = None
-        t3         = None
-        t4         = None
-        t5         = None
-        t6         = None
-        t7         = None
-        t8         = None
-        t9         = None
+>>> sac = SACTrace()
+>>> sac.lh('picks') # doctest: +SKIP
+Reference Time = 01/01/1970 (001) 00:00:00.000000
+	iztype IB: begin time
+a          = None
+b          = 0.0
+e          = 0.0
+f          = None
+o          = None
+t0         = None
+t1         = None
+t2         = None
+t3         = None
+t4         = None
+t5         = None
+t6         = None
+t7         = None
+t8         = None
+t9         = None
 
 Header values as attributes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -228,7 +221,7 @@ Great for interactive use, with (ipython) tab-completion...
     sac.kcmpnm            sac.nzmin             sac.write
     sac.kdatrd            sac.nzmsec
 
-...and documentation!
+...and documentation (in iPython)!
 
 .. code:: python
 
@@ -240,6 +233,7 @@ Great for interactive use, with (ipython) tab-completion...
     String form: <property object at 0x106404940>
     Docstring:
     I    Reference time equivalence:
+
     * IUNKN (5): Unknown
     * IB (9): Begin time
     * IDAY (10): Midnight of reference GMT day
@@ -250,91 +244,68 @@ Great for interactive use, with (ipython) tab-completion...
 Convert to/from ObsPy Traces
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: python
+.. rubric:: Example
 
-    from obspy import read
-    tr = read()[0]
-    print tr.stats
+>>> from obspy import read
+>>> tr = read()[0]
+>>> print(tr.stats) # doctest: +SKIP
+         network: BW
+         station: RJOB
+        location:
+         channel: EHZ
+       starttime: 2009-08-24T00:20:03.000000Z
+         endtime: 2009-08-24T00:20:32.990000Z
+   sampling_rate: 100.0
+           delta: 0.01
+            npts: 3000
+           calib: 1.0
+    back_azimuth: 100.0
+     inclination: 30.0
 
-::
+>>> sac = SACTrace.from_obspy_trace(tr)
+>>> print(sac) #doctest: +SKIP
+Reference Time = 08/24/2009 (236) 00:20:03.000000
+	iztype IB: begin time
+b          = 0.0
+delta      = 0.00999999977648
+e          = 29.9899993297
+iftype     = itime
+iztype     = ib
+kcmpnm     = EHZ
+knetwk     = BW
+kstnm      = RJOB
+lcalda     = True
+leven      = True
+lovrok     = True
+lpspol     = False
+npts       = 3000
+nvhdr      = 6
+nzhour     = 0
+nzjday     = 236
+nzmin      = 20
+nzmsec     = 0
+nzsec      = 3
+nzyear     = 2009
+scale      = 1.0
 
-             network: BW
-             station: RJOB
-            location:
-             channel: EHZ
-           starttime: 2009-08-24T00:20:03.000000Z
-             endtime: 2009-08-24T00:20:32.990000Z
-       sampling_rate: 100.0
-               delta: 0.01
-                npts: 3000
-               calib: 1.0
-        back_azimuth: 100.0
-         inclination: 30.0
-
-.. code:: python
-
-    sac = SACTrace.from_obspy_trace(tr)
-    print sac
-
-::
-
-    Reference Time = 08/24/2009 (236) 00:20:03.000000
-        iztype IB: begin time
-    b          = 0.0
-    cmpaz      = 0.0
-    cmpinc     = 0.0
-    delta      = 0.00999999977648
-    depmax     = 1293.77099609
-    depmen     = -4.49556303024
-    depmin     = -1515.81311035
-    e          = 29.9899993297
-    iftype     = itime
-    internal0  = 2.0
-    iztype     = ib
-    kcmpnm     = EHZ
-    knetwk     = BW
-    kstnm      = RJOB
-    lcalda     = False
-    leven      = True
-    lovrok     = True
-    lpspol     = True
-    npts       = 3000
-    nvhdr      = 6
-    nzhour     = 0
-    nzjday     = 236
-    nzmin      = 20
-    nzmsec     = 0
-    nzsec      = 3
-    nzyear     = 2009
-    scale      = 1.0
-
-.. code:: python
-
-    tr2 = sac.to_obspy_trace()
-    print tr2.stats
-
-::
-
-             network: BW
-             station: RJOB
-            location:
-             channel: EHZ
-           starttime: 2009-08-24T00:20:03.000000Z
-             endtime: 2009-08-24T00:20:32.990000Z
-       sampling_rate: 100.0
-               delta: 0.01
-                npts: 3000
-               calib: 1.0
-                 sac: AttribDict({'cmpaz': 0.0, 'nzyear': 2009, 'nzjday': 236,
-                 'iztype': 9, 'evla': 0.0, 'nzhour': 0, 'lcalda': 0,
-                 'evlo': 0.0, 'scale': 1.0, 'nvhdr': 6, 'depmin': -1515.8131,
-                 'kcmpnm': 'EHZ', 'nzsec': 3, 'internal0': 2.0,
-                 'depmen': -4.495563, 'cmpinc': 0.0,
-                 'depmax': 1293.771, 'iftype': 1, 'delta': 0.0099999998,
-                 'nzmsec': 0, 'lpspol': 1, 'b': 0.0, 'e': 29.99, 'leven': 1,
-                 'kstnm': 'RJOB', 'nzmin': 20, 'lovrok': 1, 'npts': 3000,
-                 'knetwk': 'BW'})
-
+>>> tr2 = sac.to_obspy_trace()
+>>> print(tr2.stats) #doctest: +SKIP
+         network: BW
+         station: RJOB
+        location:
+         channel: EHZ
+       starttime: 2009-08-24T00:20:03.000000Z
+         endtime: 2009-08-24T00:20:32.990000Z
+   sampling_rate: 100.0
+           delta: 0.01
+            npts: 3000
+           calib: 1.0
+             sac: AttribDict({u'nzsec': 3, u'scale': 1.0, u'e': 29.99,
+                 u'nzyear': 2009, u'nvhdr': 6, u'kcmpnm': u'EHZ', u'b': 0.0,
+                 u'nzjday': 236, u'iztype': 9, u'kstnm': u'RJOB', u'iftype': 1,
+                 u'npts': 3000, u'lovrok': 1, u'nzhour': 0, u'nzmin': 20,
+                 u'delta': 0.0099999998, u'knetwk': u'BW', u'lcalda': 1,
+                 u'lpspol': 0, u'nzmsec': 0, u'leven': 1})
 
 """
 from __future__ import (absolute_import, division, print_function,
