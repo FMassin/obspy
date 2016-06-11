@@ -703,18 +703,15 @@ class SACTrace(object):
         ..rubric:: Example
 
         >>> sac = SACTrace(nzyear=1995, nzmsec=50, data=np.arange(100))
-        >>> print(sac) # doctest: +SKIP
+        >>> print(sac)  # doctest: +NORMALIZE_WHITESPACE
         Reference Time = 01/01/1995 (001) 00:00:00.050000
-                iztype IB: begin time
+           iztype IB: begin time
         b          = 0.0
-        cmpaz      = 0.0
-        cmpinc     = 0.0
         delta      = 1.0
         e          = 99.0
         iftype     = itime
         internal0  = 2.0
         iztype     = ib
-        kcmpnm     = Z
         lcalda     = False
         leven      = True
         lovrok     = True
@@ -1105,12 +1102,15 @@ class SACTrace(object):
 
         .. rubric:: Example
 
-        >>> sac = SACTrace.read(filename, headonly=True) # doctest: +SKIP
-        >>> try: # doctest: +SKIP
-                sac.validate('data_hdrs') # doctest: +SKIP
-            except SacInvalidContentError: # doctest: +SKIP
-                sac = SACTrace.read(filename, headonly=False) # doctest: +SKIP
-                sac.validate('data_hdrs') # doctest: +SKIP
+        >>> from obspy.core.util import get_example_file
+        >>> from obspy.io.sac.util import SacInvalidContentError
+        >>> file_ = get_example_file("test.sac")
+        >>> sac = SACTrace.read(file_, headonly=True)
+        >>> try:
+        ...     sac.validate('data_hdrs')
+        ... except (ValueError, SacInvalidContentError):
+        ...     sac = SACTrace.read(file_, headonly=False)
+        ...     sac.validate('data_hdrs')
 
         See also: :meth:`SACTrace.validate`
 
@@ -1189,14 +1189,14 @@ class SACTrace(object):
 
         .. rubric:: Example
 
-        >>> sac = SACTrace._from_arrays() # doctest: +SKIP
-        >>> print(sac) # doctest: +SKIP
+        >>> sac = SACTrace._from_arrays()
+        >>> print(sac)  # doctest: +NORMALIZE_WHITESPACE
         Reference Time = XX/XX/XX (XXX) XX:XX:XX.XXXXXX
-                iztype not set
-            lcalda     = False
-            leven      = False
-            lovrok     = False
-            lpspol     = False
+            iztype not set
+        lcalda     = False
+        leven      = False
+        lovrok     = False
+        lpspol     = False
 
         """
         # TODO: handle byte order independently instead of just from "hf".
@@ -1281,8 +1281,12 @@ class SACTrace(object):
 
         .. rubric:: Example
 
-        >>> sac = SACTrace() # doctest: +SKIP
-        >>> tr = sac.to_obspy_trace() # doctest: +SKIP
+        >>> from obspy.core.util import get_example_file
+        >>> file_ = get_example_file("test.sac")
+        >>> sac = SACTrace.read(file_, headonly=True)
+        >>> tr = sac.to_obspy_trace()
+        >>> print(tr)  # doctest: +ELLIPSIS
+        .STA..Q | 1978-07-18T08:00:10.000000Z - ... | 1.0 Hz, 100 samples
 
         """
         # make the obspy test for tests/data/testxy.sac pass
@@ -1337,20 +1341,23 @@ class SACTrace(object):
 
         .. rubric:: Example
 
-        >>> sac = SACTrace.read(filename) # doctest: +SKIP
-        >>> try: # doctest: +SKIP
-                sac.validate('delta') # doctest: +SKIP
-            except SacInvalidContentError as e: # doctest: +SKIP
-                # i'm sure this is what they meant:-)
-                sac.delta *= -1.0 # doctest: +SKIP
-                sac.validate('delta') # doctest: +SKIP
+        >>> from obspy.core.util import get_example_file
+        >>> from obspy.io.sac.util import SacInvalidContentError
+        >>> file_ = get_example_file("test.sac")
+        >>> sac = SACTrace.read(file_)
+        >>> try:
+        ...     sac.validate('delta')
+        ... except SacInvalidContentError as e:
+        ...     # i'm sure this is what they meant:-)
+        ...     sac.delta *= -1.0
+        ...     sac.validate('delta')
 
-        >>> sac.data += 5.0 # doctest: +SKIP
-        >>> try: # doctest: +SKIP
-                sac.validate('data_hdrs') # doctest: +SKIP
-            except SacInvalidContentError: # doctest: +SKIP
-                sac._flush_headers() # doctest: +SKIP
-                sac.validate('data_hdrs') # doctest: +SKIP
+        >>> sac.data += 5.0
+        >>> try:
+        ...     sac.validate('data_hdrs')
+        ... except SacInvalidContentError:
+        ...     sac._flush_headers()
+        ...     sac.validate('data_hdrs')
 
         """
         _io.validate_sac_content(self._hf, self._hi, self._hs, self.data,
@@ -1433,28 +1440,35 @@ class SACTrace(object):
 
         .. rubric:: Example
 
-        >>> sac = SACTrace.read('tests/data/test.sac') # doctest: +SKIP
-        >>> sac.lh() # doctest: +SKIP
+        >>> from obspy.core.util import get_example_file
+        >>> file_ = get_example_file("test.sac")
+        >>> sac = SACTrace.read(file_)
+        >>> sac.lh()  # doctest: +NORMALIZE_WHITESPACE
         Reference Time = 07/18/1978 (199) 08:00:00.000000
-         unrecognized iztype: None
-        b	= 10.0
-        delta	= 1.0
-        depmax	= 1.0
-        depmin	= -1.0
-        e	= 109.0
-        istreg	= 1
-        kcmpnm	= Q
-        kevnm	= FUNCGEN: SINE
-        kstnm	= STA
-        npts	= 100
-        nvhdr	= 6
-        nzhour	= 8
-        nzjday	= 199
-        nzmin	= 0
-        nzmsec	= 0
-        nzsec	= 0
-        nzyear	= 1978
-
+           iztype not set
+        b          = 10.0
+        delta      = 1.0
+        depmax     = 1.0
+        depmen     = 9.05990589217e-08
+        depmin     = -1.0
+        e          = 109.0
+        iftype     = itime
+        kcmpnm     = Q
+        kevnm      = FUNCGEN: SINE
+        kstnm      = STA
+        lcalda     = True
+        leven      = True
+        lovrok     = True
+        lpspol     = False
+        npts       = 100
+        nvhdr      = 6
+        nzhour     = 8
+        nzjday     = 199
+        nzmin      = 0
+        nzmsec     = 0
+        nzsec      = 0
+        nzyear     = 1978
+        unused23   = 0
         """
         # https://ds.iris.edu/files/sac-manual/commands/listhdr.html
         print(self._format_header_str(hdrlist))
@@ -1512,10 +1526,14 @@ class SACTrace(object):
         ...it is recommended to just make sure your target reference header is
         set and correct, and set the iztype:
 
-        >>> sac.o = UTCDateTime(year=1982, julday=123,  # doctest: +SKIP
-                                hour=13, minute=37,  # doctest: +SKIP
-                                second=10, microsecond=103)  # doctest: +SKIP
-        >>> sac.iztype = 'io' # doctest: +SKIP
+        >>> from obspy import UTCDateTime
+        >>> from obspy.core.util import get_example_file
+        >>> file_ = get_example_file("test.sac")
+        >>> sac = SACTrace.read(file_)
+        >>> sac.o = UTCDateTime(year=1982, julday=123,
+        ...                     hour=13, minute=37,
+        ...                     second=10, microsecond=103)
+        >>> sac.iztype = 'io'
 
         The iztype setter will deal with shifting the time values.
 
