@@ -1199,9 +1199,17 @@ class SACTrace(object):
         lpspol     = False
 
         """
-        # TODO: handle byte order independently instead of just from "hf".
-        # XXX: assumes hf was provided.
-        hf0, hi0, hs0 = _io.init_header_arrays(byteorder=hf.dtype.byteorder)
+        # use the first byteorder we find, or system byteorder if we
+        # never find any
+        bo = '='
+        for arr in (hf, hi, hs, data):
+            try:
+                bo = arr.dtype.byteorder
+                break
+            except AttributeError:
+                # arr is None (not supplied)
+                pass
+        hf0, hi0, hs0 = _io.init_header_arrays(byteorder=bo)
 
         if hf is None:
             hf = hf0
