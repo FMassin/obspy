@@ -316,8 +316,18 @@ class Client(object):
             for filename in filenames:
                 start, end = self._filename_to_time_range(filename)
                 st__ = st_.slice(start, end, nearest_sample=False)
+                # leave out last sample if it is exactly on the boundary.
+                # it belongs to the next file in that case.
+                for tr in st__:
+                    if tr.stats.endtime == end:
+                        tr.data = tr.data[:-1]
+                # the above can lead to empty traces.. remove those
+                st__.traces = [tr for tr in st__.traces if len(tr.data)]
+                for tr in st__:
+                    if tr.stats.endtime == end:
+                        tr.data = tr.data[:-1]
                 if st__:
-                    dict_[filename] = st_.slice(start, end)
+                    dict_[filename] = st__
         return dict_
 
     def _filename_to_time_range(self, filename):
