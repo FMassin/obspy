@@ -1110,11 +1110,17 @@ class SACTrace(object):
         >>> from obspy.io.sac.util import SacInvalidContentError
         >>> file_ = get_example_file("test.sac")
         >>> sac = SACTrace.read(file_, headonly=True)
-        >>> try:
-        ...     sac.validate('data_hdrs')
-        ... except (ValueError, SacInvalidContentError):
-        ...     sac = SACTrace.read(file_, headonly=False)
-        ...     sac.validate('data_hdrs')
+        >>> sac.data is None
+        True
+        >>> sac = SACTrace.read(file_, headonly=False)
+        >>> sac.data  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+        array([ -8.74227766e-08,  -3.09016973e-01,  -5.87785363e-01,
+                -8.09017122e-01,  -9.51056600e-01,  -1.00000000e+00,
+                -9.51056302e-01,  -8.09016585e-01,  -5.87784529e-01,
+                ...
+                 8.09022486e-01,   9.51059461e-01,   1.00000000e+00,
+                 9.51053500e-01,   8.09011161e-01,   5.87777138e-01,
+                 3.09007347e-01], dtype=float32)
 
         See also: :meth:`SACTrace.validate`
 
@@ -1197,7 +1203,7 @@ class SACTrace(object):
         >>> print(sac)  # doctest: +NORMALIZE_WHITESPACE
         Reference Time = XX/XX/XX (XXX) XX:XX:XX.XXXXXX
             iztype not set
-        lcalda     = False
+        lcalda     = True
         leven      = False
         lovrok     = False
         lpspol     = False
