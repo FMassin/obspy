@@ -71,15 +71,15 @@ Build a SACTrace from a header dictionary and data array
 
 .. rubric:: Example
 
->>> header = {'kstnm': 'ANMO', 'kcmpnm': 'BHZ', 'stla': 40.5, 'stlo': -108.23,\
-              'evla': -15.123, 'evlo': 123, 'evdp': 50, 'nzyear': 2012,\
-              'nzjday': 123, 'nzhour': 13, 'nzmin': 43, 'nzsec': 17,\
-              'nzmsec': 100, 'delta': 1.0/40}
+>>> header = {'kstnm': 'ANMO', 'kcmpnm': 'BHZ', 'stla': 40.5, 'stlo': -108.23,
+...           'evla': -15.123, 'evlo': 123, 'evdp': 50, 'nzyear': 2012,
+...           'nzjday': 123, 'nzhour': 13, 'nzmin': 43, 'nzsec': 17,
+...           'nzmsec': 100, 'delta': 1.0/40}
 >>> sac = SACTrace(data=np.random.random(100), **header)
->>> sac
-SACTrace(nzyear=2012, delta=0.025, nzsec=17, iztype=9, evla=-15.123, \
-nzhour=13, lcalda=0, evlo=123.0, iftype=1, nvhdr=6, kcmpnm=u'BHZ', nzjday=123,\
- internal0=2.0, lovrok=1, npts=0, e=0.0, nzmsec=100, lpspol=1, b=0.0, \
+>>> sac  # doctest: +NORMALIZE_WHITESPACE
+SACTrace(nzyear=2012, delta=0.025, nzsec=17, iztype=9, evla=-15.123,
+nzhour=13, lcalda=0, evlo=123.0, iftype=1, nvhdr=6, kcmpnm=u'BHZ', nzjday=123,
+internal0=2.0, lovrok=1, npts=0, e=0.0, nzmsec=100, lpspol=1, b=0.0,
 stla=40.5, leven=1, stlo=-108.23, kstnm=u'ANMO', nzmin=43, evdp=50.0)
 
 
@@ -88,11 +88,10 @@ Reference-time and relative time headers
 
 .. rubric:: Example
 
->>> sac = SACTrace(nzyear=2000, nzjday=1, nzhour=0, nzmin=0, nzsec=0, \
-                   nzmsec=0, t1=23.5, data=np.arange(100))
+>>> sac = SACTrace(nzyear=2000, nzjday=1, nzhour=0, nzmin=0, nzsec=0,
+...                nzmsec=0, t1=23.5, data=np.arange(100))
 >>> print(sac.reftime)
 2000-01-01T00:00:00.000000Z
-
 >>> sac.b, sac.e, sac.t1
 (0.0, 99.0, 23.5)
 
@@ -101,8 +100,8 @@ preserved.
 
 .. rubric:: Example
 
->>> sac = SACTrace(nzyear=2000, nzjday=1, nzhour=0, nzmin=0, nzsec=0, \
-                   nzmsec=0, t1=23.5, data=np.arange(100))
+>>> sac = SACTrace(nzyear=2000, nzjday=1, nzhour=0, nzmin=0, nzsec=0,
+...                nzmsec=0, t1=23.5, data=np.arange(100))
 >>> sac.reftime -= 2.5
 >>> sac.b, sac.e, sac.t1
 (2.5, 101.5, 26.0)
@@ -112,8 +111,8 @@ preserved.
 
 .. rubric:: Example
 
->>> sac = SACTrace(nzyear=2000, nzjday=1, nzhour=0, nzmin=0, nzsec=0, \
-                   nzmsec=0, t1=23.5, data=np.arange(100))
+>>> sac = SACTrace(nzyear=2000, nzjday=1, nzhour=0, nzmin=0, nzsec=0,
+...                nzmsec=0, t1=23.5, data=np.arange(100))
 >>> # set the reftime two minutes later
 >>> sac.reftime = UTCDateTime(2000, 1, 1, 0, 2, 0, 0)
 >>> sac.b, sac.e, sac.t1
@@ -127,9 +126,9 @@ Print non-null header values.
 .. rubric:: Example
 
 >>> sac = SACTrace()
->>> print(sac) # doctest: +SKIP
+>>> print(sac)  # doctest: +NORMALIZE_WHITESPACE
 Reference Time = 01/01/1970 (001) 00:00:00.000000
-	iztype IB: begin time
+   iztype IB: begin time
 b          = 0.0
 delta      = 1.0
 e          = 0.0
@@ -154,9 +153,9 @@ Print relative time header values.
 .. rubric:: Example
 
 >>> sac = SACTrace()
->>> sac.lh('picks') # doctest: +SKIP
+>>> sac.lh('picks')  # doctest: +NORMALIZE_WHITESPACE
 Reference Time = 01/01/1970 (001) 00:00:00.000000
-	iztype IB: begin time
+   iztype IB: begin time
 a          = None
 b          = 0.0
 e          = 0.0
@@ -248,7 +247,7 @@ Convert to/from ObsPy Traces
 
 >>> from obspy import read
 >>> tr = read()[0]
->>> print(tr.stats) # doctest: +SKIP
+>>> print(tr.stats)  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
          network: BW
          station: RJOB
         location:
@@ -261,11 +260,14 @@ Convert to/from ObsPy Traces
            calib: 1.0
     back_azimuth: 100.0
      inclination: 30.0
+        response: Channel Response
+            ...
+
 
 >>> sac = SACTrace.from_obspy_trace(tr)
->>> print(sac) #doctest: +SKIP
+>>> print(sac)  # doctest: +NORMALIZE_WHITESPACE
 Reference Time = 08/24/2009 (236) 00:20:03.000000
-	iztype IB: begin time
+   iztype IB: begin time
 b          = 0.0
 delta      = 0.00999999977648
 e          = 29.9899993297
@@ -289,7 +291,7 @@ nzyear     = 2009
 scale      = 1.0
 
 >>> tr2 = sac.to_obspy_trace()
->>> print(tr2.stats) #doctest: +SKIP
+>>> print(tr2.stats)  # doctest: +NORMALIZE_WHITESPACE
          network: BW
          station: RJOB
         location:
@@ -301,11 +303,13 @@ scale      = 1.0
             npts: 3000
            calib: 1.0
              sac: AttribDict({u'nzsec': 3, u'scale': 1.0, u'e': 29.99,
-                 u'nzyear': 2009, u'nvhdr': 6, u'kcmpnm': u'EHZ', u'b': 0.0,
-                 u'nzjday': 236, u'iztype': 9, u'kstnm': u'RJOB', u'iftype': 1,
-                 u'npts': 3000, u'lovrok': 1, u'nzhour': 0, u'nzmin': 20,
-                 u'delta': 0.0099999998, u'knetwk': u'BW', u'lcalda': 1,
-                 u'lpspol': 0, u'nzmsec': 0, u'leven': 1})
+                              u'nzyear': 2009, u'nvhdr': 6, u'kcmpnm': u'EHZ',
+                              u'b': 0.0, u'nzjday': 236, u'iztype': 9,
+                              u'kstnm': u'RJOB', u'iftype': 1, u'npts': 3000,
+                              u'lovrok': 1, u'nzhour': 0, u'nzmin': 20,
+                              u'delta': 0.0099999998, u'knetwk': u'BW',
+                              u'lcalda': 1, u'lpspol': 0, u'nzmsec': 0,
+                              u'leven': 1})
 
 """
 from __future__ import (absolute_import, division, print_function,
