@@ -17,7 +17,7 @@ import warnings
 import numpy as np
 
 from obspy.taup import TauPyModel
-from obspy.taup.taup_geo import calc_dist
+from obspy.taup.tau import Arrivals
 import obspy.geodetics.base as geodetics
 
 
@@ -109,33 +109,6 @@ class TauPyModelTestCase(unittest.TestCase):
         self.assertAlmostEqual(p_arrival.incident_angle, 26.70, 2)
         self.assertAlmostEqual(p_arrival.purist_distance, 35.00, 2)
         self.assertEqual(p_arrival.purist_name, "P")
-
-    def test_taup_geo_calc_dist(self):
-        """Test for calc_dist"""
-        self.assertAlmostEqual(calc_dist(source_latitude_in_deg=20.0,
-                                         source_longitude_in_deg=33.0,
-                                         receiver_latitude_in_deg=55.0,
-                                         receiver_longitude_in_deg=33.0,
-                                         radius_of_planet_in_km=6371.0,
-                                         flattening_of_planet=0.0), 35.0, 5)
-        self.assertAlmostEqual(calc_dist(source_latitude_in_deg=55.0,
-                                         source_longitude_in_deg=33.0,
-                                         receiver_latitude_in_deg=20.0,
-                                         receiver_longitude_in_deg=33.0,
-                                         radius_of_planet_in_km=6371.0,
-                                         flattening_of_planet=0.0), 35.0, 5)
-        self.assertAlmostEqual(calc_dist(source_latitude_in_deg=-20.0,
-                                         source_longitude_in_deg=33.0,
-                                         receiver_latitude_in_deg=-55.0,
-                                         receiver_longitude_in_deg=33.0,
-                                         radius_of_planet_in_km=6371.0,
-                                         flattening_of_planet=0.0), 35.0, 5)
-        self.assertAlmostEqual(calc_dist(source_latitude_in_deg=-20.0,
-                                         source_longitude_in_deg=33.0,
-                                         receiver_latitude_in_deg=-55.0,
-                                         receiver_longitude_in_deg=33.0,
-                                         radius_of_planet_in_km=6.371,
-                                         flattening_of_planet=0.0), 35.0, 5)
 
     @unittest.skipIf(not geodetics.HAS_GEOGRAPHICLIB,
                      'Module geographiclib is not installed')
@@ -864,6 +837,142 @@ class TauPyModelTestCase(unittest.TestCase):
             # Some models do produce s-waves but they are very far from the
             # AK135 value.
             self.assertTrue(abs(arrivals[0].time - expected) < 50)
+
+    def test_paths_for_crustal_phases(self):
+        """
+        Tests that Pn and PmP are correctly modelled and not mixed up.
+
+        See #1392.
+        """
+        model = TauPyModel(model='iasp91')
+        paths = model.get_ray_paths(source_depth_in_km=0,
+                                    distance_in_degree=1,
+                                    phase_list=['Pn', 'PmP'])
+        self.assertEqual(len(paths), 2)
+
+        self.assertEqual(paths[0].name, "PmP")
+        self.assertAlmostEqual(paths[0].time, 21.273, 3)
+        self.assertEqual(paths[1].name, "Pn")
+        self.assertAlmostEqual(paths[1].time, 21.273, 3)
+
+        self.assertAlmostEqual(paths[0].time, 21.273, 3)
+
+        # Values of visually checked paths to guard against regressions.
+        pmp_path = [
+            [0.0, 0.0],
+            [8.732364066174294e-07, 0.005402127286288305],
+            [0.00020293803558129412, 1.2550644943312363],
+            [0.000405124234951687, 2.5047268613761844],
+            [0.0008098613580518535, 5.004051595465171],
+            [0.0016207981804224497, 10.002701063643144],
+            [0.00243369214394241, 15.001350531821117],
+            [0.0032485517460744207, 20.0],
+            [0.0034500021984838003, 20.9375],
+            [0.0036515675727796315, 21.875],
+            [0.004055043605178164, 23.75],
+            [0.004863380445624696, 27.5],
+            [0.006485622554890742, 35.0],
+            [0.008803860898528547, 35.018603858353345],
+            [0.011122099242166353, 35.0],
+            [0.012744341351432398, 27.5],
+            [0.01355267819187893, 23.75],
+            [0.013956154224277463, 21.875],
+            [0.014157719598573294, 20.9375],
+            [0.014359170050982674, 20.0],
+            [0.015174029653114684, 15.001350531821117],
+            [0.015986923616634643, 10.002701063643144],
+            [0.01679786043900524, 5.004051595465171],
+            [0.017202597562105407, 2.5047268613761844],
+            [0.0174047837614758, 1.2550644943312363],
+            [0.017606848560650475, 0.005402127286288305],
+            [0.017607721797057094, 0.0]]
+        pn_path = [
+            [0.0, 0.0],
+            [8.732421799574388e-07, 0.005402127286288305],
+            [0.00020293937754080365, 1.2550644943312363],
+            [0.0004051269144571584, 2.5047268613761844],
+            [0.0008098667167377564, 5.004051595465171],
+            [0.0016208089138889542, 10.002701063643144],
+            [0.002433708274208186, 15.001350531821117],
+            [0.003248573295310095, 20.0],
+            [0.0034500255976490177, 20.9375],
+            [0.0036515928239481774, 21.875],
+            [0.004055072566590625, 23.75],
+            [0.004863416852584004, 27.5],
+            [0.0064856739540738425, 35.0],
+            [0.0064856739540738425, 35.0],
+            [0.010967618565869454, 35.0],
+            [0.010967618565869454, 35.0],
+            [0.012589875667359293, 27.5],
+            [0.013398219953352672, 23.75],
+            [0.01380169969599512, 21.875],
+            [0.01400326692229428, 20.9375],
+            [0.014204719224633202, 20.0],
+            [0.015019584245735112, 15.001350531821117],
+            [0.015832483606054343, 10.002701063643144],
+            [0.01664342580320554, 5.004051595465171],
+            [0.017048165605486137, 2.5047268613761844],
+            [0.017250353142402492, 1.2550644943312363],
+            [0.017452419277763337, 0.005402127286288305],
+            [0.017453292519943295, 0.0]]
+
+        np.testing.assert_allclose([_i[0] for _i in pmp_path],
+                                   paths[0].path["dist"])
+        np.testing.assert_allclose([_i[1] for _i in pmp_path],
+                                   paths[0].path["depth"])
+        np.testing.assert_allclose([_i[0] for _i in pn_path],
+                                   paths[1].path["dist"])
+        np.testing.assert_allclose([_i[1] for _i in pn_path],
+                                   paths[1].path["depth"])
+
+    def test_arrivals_class(self):
+        """
+        Tests list operations on the Arrivals class.
+
+        See #1518.
+        """
+        model = TauPyModel(model='iasp91')
+        arrivals = model.get_ray_paths(source_depth_in_km=0,
+                                       distance_in_degree=1,
+                                       phase_list=['Pn', 'PmP'])
+        self.assertEqual(len(arrivals), 2)
+        # test copy
+        self.assertTrue(isinstance(arrivals.copy(), Arrivals))
+        # test sum
+        self.assertTrue(isinstance(arrivals+arrivals, Arrivals))
+        self.assertTrue(isinstance(arrivals+arrivals[0], Arrivals))
+        # test multiplying
+        self.assertTrue(isinstance(arrivals*2, Arrivals))
+        arrivals *= 3
+        self.assertEqual(len(arrivals), 6)
+        self.assertTrue(isinstance(arrivals, Arrivals))
+        # test slicing
+        self.assertTrue(isinstance(arrivals[2:5], Arrivals))
+        # test appending
+        arrivals.append(arrivals[0])
+        self.assertEqual(len(arrivals), 7)
+        self.assertTrue(isinstance(arrivals, Arrivals))
+        # test assignment
+        arrivals[0] = arrivals[-1]
+        self.assertTrue(isinstance(arrivals, Arrivals))
+        arrivals[2:5] = arrivals[1:4]
+        self.assertTrue(isinstance(arrivals, Arrivals))
+        # test assignment with wrong type
+        with self.assertRaises(TypeError):
+            arrivals[0] = 10.
+        with self.assertRaises(TypeError):
+            arrivals[2:5] = [0, 1, 2]
+        with self.assertRaises(TypeError):
+            arrivals.append(arrivals)
+        # test add and mul with wrong type
+        with self.assertRaises(TypeError):
+            arrivals + [2, ]
+        with self.assertRaises(TypeError):
+            arrivals += [2, ]
+        with self.assertRaises(TypeError):
+            arrivals * [2, ]
+        with self.assertRaises(TypeError):
+            arrivals *= [2, ]
 
 
 def suite():

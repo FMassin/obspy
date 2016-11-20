@@ -29,6 +29,8 @@ import timeit
 
 import numpy as np
 
+from lxml.etree import XMLSyntaxError
+
 import obspy
 from obspy.core.util import Enum
 
@@ -351,19 +353,29 @@ class Station(object):
         of the download helpers does not allow for a StationXML file with no
         data.
         """
+        from obspy.io.mseed.util import get_start_and_end_time
         # All or nothing for each channel.
         for id in self.miss_station_information.keys():
-            logger.warning("No station information could be downloaded for "
-                           "%s.%s.%s.%s. All downloaded MiniSEED files "
+            logger.warning("Station information could not be downloaded for "
+                           "%s.%s.%s.%s. MiniSEED files outside of the "
+                           "station information period "
                            "will be deleted!" % (
                                self.network, self.station, id[0], id[1]))
             channel = [_i for _i in self.channels if
                        (_i.location, _i.channel) == id][0]
             for time_interval in channel.intervals:
+                # Check that the time_interval.start and end are correct!
+                time_interval.start, time_interval.end = \
+                    get_start_and_end_time(time_interval.filename)
                 # Only delete downloaded things!
                 if time_interval.status == STATUS.DOWNLOADED:
-                    utils.safe_delete(time_interval.filename)
-                    time_interval.status = STATUS.DOWNLOAD_REJECTED
+                    # Only delete if the station data are actually missing
+                    # for this time
+                    miss_start, miss_end = self.miss_station_information[id]
+                    if miss_start <= time_interval.start <= miss_end and \
+                       miss_start <= time_interval.end <= miss_end:
+                        utils.safe_delete(time_interval.filename)
+                        time_interval.status = STATUS.DOWNLOAD_REJECTED
 
 
 class Channel(object):
@@ -532,8 +544,7 @@ class ClientDownloadHelper(object):
         # There are essentially two possibilities. If no station exists yet,
         # it will choose the largest subset of stations satisfying the
         # minimum inter-station distance constraint.
-        if not existing_stations and \
-                not any([_i.has_existing_time_intervals for _i in stations]):
+        if not existing_stations:
             # Build k-d-tree and query for the neighbours of each point within
             # the minimum distance.
             kd_tree = utils.SphericalNearestNeighbour(stations)
@@ -680,7 +691,17 @@ class ClientDownloadHelper(object):
             download_size += size
 
             # Extract information about that file.
-            info = utils.get_stationxml_contents(filename)
+            try:
+                info = utils.get_stationxml_contents(filename)
+            # Sometimes some services choose to not return XML files - guard
+            # against it and just delete the file. At subsequent runs the
+            # mass downloader will attempt to download it again.
+            except XMLSyntaxError:
+                self.logger.info(
+                    "Client '%s' - File %s is not an XML file - it will be "
+                    "deleted." % (self.client_name, filename))
+                utils.safe_delete(filename)
+                continue
 
             still_missing = {}
             # Make sure all missing information has been downloaded by
@@ -698,7 +719,17 @@ class ClientDownloadHelper(object):
                 starttime = min([_i.starttime for _i in c_info])
                 endtime = max([_i.endtime for _i in c_info])
                 if starttime > times[0] or endtime < times[1]:
-                    still_missing[c_id] = times
+                    # Cope with case that not full day of station info missing
+                    if starttime < times[1]:
+                        still_missing[c_id] = (times[0], starttime)
+                        station.have_station_information[c_id] = (starttime,
+                                                                  times[1])
+                    elif endtime > times[0]:
+                        still_missing[c_id] = (endtime, times[1])
+                        station.have_station_information[c_id] = (times[0],
+                                                                  endtime)
+                    else:
+                        still_missing[c_id] = times
                     continue
                 station.have_station_information[c_id] = times
 
@@ -1076,6 +1107,14 @@ class ClientDownloadHelper(object):
                 "Client '{0}' - Failed getting availability: %s".format(
                     self.client_name), str(e))
             return
+        # This sometimes fires if a service returns some random stuff which
+        # is not a valid station file.
+        except Exception as e:
+            self.logger.error(
+                "Client '{0}' - Failed getting availability due to "
+                "unexpected exception: %s".format(self.client_name), str(e))
+            return
+
         self.logger.info("Client '%s' - Successfully requested availability "
                          "(%.2f seconds)" % (self.client_name, end - start))
 

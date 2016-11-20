@@ -11,9 +11,12 @@ import warnings
 
 from matplotlib import rcParams
 
+import numpy as np
+
 from obspy.core.event import (Catalog, Comment, CreationInfo, Event, Origin,
                               Pick, ResourceIdentifier, WaveformStreamID,
-                              read_events)
+                              read_events, Magnitude, FocalMechanism)
+from obspy.core.event.source import farfield
 from obspy.core.utcdatetime import UTCDateTime
 from obspy.core.util.base import get_basemap_version, get_cartopy_version
 from obspy.core.util.testing import ImageComparison
@@ -96,8 +99,12 @@ class EventTestCase(unittest.TestCase):
         self.assertEqual(p.phase_hint, "p")
         # Add some more random attributes. These should disappear upon
         # cleaning.
-        p.test_1 = "a"
-        p.test_2 = "b"
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            p.test_1 = "a"
+            p.test_2 = "b"
+            # two warnings should have been issued by setting non-default keys
+            self.assertEqual(len(w), 2)
         self.assertEqual(p.test_1, "a")
         self.assertEqual(p.test_2, "b")
         p.clear()
@@ -146,6 +153,24 @@ class EventTestCase(unittest.TestCase):
         with ImageComparison(self.image_dir, 'event.png') as ic:
             ev.plot(kind=[['global'], ['ortho', 'beachball'],
                           ['p_sphere', 's_sphere']], outfile=ic.name)
+
+    def test_farfield_2xn_input(self):
+        """
+        Tests to compute P/S wave farfield radiation pattern using (theta,phi)
+        pairs as input
+        """
+        # Peru 2001/6/23 20:34:23:
+        mt = [2.245, -0.547, -1.698, 1.339, -3.728, 1.444]
+        theta = np.arange(0, 360, 60)
+        phi = np.zeros(len(theta))
+        rays = np.array([theta, phi])
+        result = farfield(mt, rays, 'P')
+        ref = np.array([[-0., 1.06567166, -2.26055006, 2.19679324, -0.44435406,
+                         -2.07785517], [-0., 0., -0., 0., -0., -0.],
+                        [-1.698, 3.32980367, -3.16993006, 1.64100194,
+                         -0.15311543,
+                        -0.04592479]])
+        np.testing.assert_allclose(result, ref)
 
 
 class OriginTestCase(unittest.TestCase):
@@ -497,6 +522,20 @@ class CatalogBasemapTestCase(unittest.TestCase):
                      resolution='c', water_fill_color='#98b7e2', label=None,
                      color='date')
 
+    def test_catalog_plot_ortho_longitude_wrap(self):
+        """
+        Tests the catalog preview plot, ortho projection, some non-default
+        parameters, using Basemap, with longitudes that need the mean to be
+        computed in a circular fashion.
+        """
+        cat = read_events('/path/to/events_longitude_wrap.zmap', format='ZMAP')
+        with ImageComparison(self.image_dir,
+                             'catalog-basemap_long-wrap.png') as ic:
+            rcParams['savefig.dpi'] = 40
+            cat.plot(method='basemap', outfile=ic.name, projection='ortho',
+                     resolution='c', label=None, title='', colorbar=False,
+                     water_fill_color='b')
+
     def test_catalog_plot_local(self):
         """
         Tests the catalog preview plot, local projection, some more non-default
@@ -550,6 +589,20 @@ class CatalogCartopyTestCase(unittest.TestCase):
             cat.plot(method='cartopy', outfile=ic.name, projection='ortho',
                      resolution='c', water_fill_color='#98b7e2', label=None,
                      color='date')
+
+    def test_catalog_plot_ortho_longitude_wrap(self):
+        """
+        Tests the catalog preview plot, ortho projection, some non-default
+        parameters, using Cartopy, with longitudes that need the mean to be
+        computed in a circular fashion.
+        """
+        cat = read_events('/path/to/events_longitude_wrap.zmap', format='ZMAP')
+        with ImageComparison(self.image_dir,
+                             'catalog-cartopy_long-wrap.png') as ic:
+            rcParams['savefig.dpi'] = 40
+            cat.plot(method='cartopy', outfile=ic.name, projection='ortho',
+                     resolution='c', label=None, title='', colorbar=False,
+                     water_fill_color='b')
 
     def test_catalog_plot_local(self):
         """
@@ -846,6 +899,16 @@ class ResourceIdentifierTestCase(unittest.TestCase):
                 ResourceIdentifier._ResourceIdentifier__resource_id_weak_dict),
             {})
 
+    def test_initialize_with_resource_identifier(self):
+        """
+        Test initializing an ResourceIdentifier with an ResourceIdentifier.
+        """
+        rid = ResourceIdentifier()
+        rid2 = ResourceIdentifier(str(rid))
+        rid3 = ResourceIdentifier(rid)
+        self.assertEqual(rid, rid2)
+        self.assertEqual(rid, rid3)
+
 
 class BaseTestCase(unittest.TestCase):
     """
@@ -865,6 +928,17 @@ class BaseTestCase(unittest.TestCase):
             # setting a typoed or custom field should warn!
             err.confidence_levle = 80
             self.assertEqual(len(w), 1)
+
+    def test_event_type_objects_warn_on_non_default_key(self):
+        """
+        """
+        for cls in (Event, Origin, Pick, Magnitude, FocalMechanism):
+            obj = cls()
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter("always")
+                # setting a typoed or custom field should warn!
+                obj.some_custom_non_default_crazy_key = "my_text_here"
+                self.assertEqual(len(w), 1)
 
 
 def suite():

@@ -35,12 +35,13 @@ from obspy.core.util.misc import to_int_or_zero
 # defining ObsPy modules currently used by runtests and the path function
 DEFAULT_MODULES = ['clients.filesystem', 'core', 'db', 'geodetics', 'imaging',
                    'io.ah', 'io.ascii', 'io.cmtsolution', 'io.cnv', 'io.css',
-                   'io.datamark', 'io.gse2', 'io.json', 'io.kinemetrics',
-                   'io.kml', 'io.mseed', 'io.ndk', 'io.nied', 'io.nlloc',
-                   'io.pdas', 'io.pde', 'io.quakeml', 'io.sac', 'io.seg2',
-                   'io.segy', 'io.seisan', 'io.sh', 'io.shapefile',
-                   'io.seiscomp', 'io.stationtxt', 'io.stationxml', 'io.wav',
-                   'io.xseed', 'io.y', 'io.zmap', 'realtime', 'signal', 'taup']
+                   'io.datamark', 'io.gcf', 'io.gse2', 'io.json',
+                   'io.kinemetrics', 'io.kml', 'io.mseed', 'io.ndk',
+                   'io.nied', 'io.nlloc', 'io.nordic', 'io.pdas', 'io.pde',
+                   'io.quakeml', 'io.reftek', 'io.sac', 'io.seg2', 'io.segy',
+                   'io.seisan', 'io.sh', 'io.shapefile', 'io.seiscomp',
+                   'io.stationtxt', 'io.stationxml', 'io.wav', 'io.xseed',
+                   'io.y', 'io.zmap', 'realtime', 'signal', 'taup']
 NETWORK_MODULES = ['clients.arclink', 'clients.earthworm', 'clients.fdsn',
                    'clients.iris', 'clients.neic', 'clients.seedlink',
                    'clients.seishub', 'clients.syngine']
@@ -50,7 +51,8 @@ ALL_MODULES = DEFAULT_MODULES + NETWORK_MODULES
 WAVEFORM_PREFERRED_ORDER = ['MSEED', 'SAC', 'GSE2', 'SEISAN', 'SACXY', 'GSE1',
                             'Q', 'SH_ASC', 'SLIST', 'TSPAIR', 'Y', 'PICKLE',
                             'SEGY', 'SU', 'SEG2', 'WAV', 'DATAMARK', 'CSS',
-                            'NNSA_KB_CORE', 'AH', 'PDAS', 'KINEMETRICS_EVT']
+                            'NNSA_KB_CORE', 'AH', 'PDAS', 'KINEMETRICS_EVT',
+                            'GCF']
 EVENT_PREFERRED_ORDER = ['QUAKEML', 'NLLOC_HYP']
 # waveform plugins accepting a byteorder keyword
 WAVEFORM_ACCEPT_BYTEORDER = ['MSEED', 'Q', 'SAC', 'SEGY', 'SU']
@@ -153,6 +155,11 @@ def create_empty_data_chunk(delta, dtype, fill_value=None):
         dtype = native_str(dtype)
     if fill_value is None:
         temp = np.ma.masked_all(delta, dtype=np.dtype(dtype))
+        # fill with nan if float number and otherwise with a very small number
+        if issubclass(temp.data.dtype.type, np.integer):
+            temp.data[:] = np.iinfo(temp.data.dtype).min
+        else:
+            temp.data[:] = np.nan
     elif (isinstance(fill_value, list) or isinstance(fill_value, tuple)) \
             and len(fill_value) == 2:
         # if two values are supplied use these as samples bordering to our data
@@ -485,6 +492,7 @@ def make_format_plugin_table(group="waveform", method="read", numspaces=4,
     JSON      :mod:`...io.json`  :func:`obspy.io.json.core._write_json`
     KML       :mod:`obspy.io.kml` :func:`obspy.io.kml.core._write_kml`
     NLLOC_OBS :mod:`...io.nlloc` :func:`obspy.io.nlloc.core.write_nlloc_obs`
+    NORDIC    :mod:`obspy.io.nordic` :func:`obspy.io.nordic.core.write_select`
     QUAKEML :mod:`...io.quakeml` :func:`obspy.io.quakeml.core._write_quakeml`
     SHAPEFILE :mod:`obspy.io.shapefile`
                              :func:`obspy.io.shapefile.core._write_shapefile`

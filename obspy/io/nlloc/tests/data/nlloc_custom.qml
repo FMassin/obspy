@@ -6,7 +6,12 @@
       <version>ObsPy 0.9.2-1209-g0e9965dae0-dirty</version>
     </creationInfo>
     <event publicID="smi:local/cd1f535c-e75e-4dc6-8170-82e47cb40501">
+      <preferredOriginID>smi:local/3cb10e44-6aeb-4279-8caa-235452e5c9b3</preferredOriginID>
+      <comment>
+        <text>NonLinLoc OctTree Location</text>
+      </comment>
       <creationInfo>
+        <author>Megies LMU Munich</author>
         <creationTime>2014-10-17T16:30:08.000000Z</creationTime>
         <version>NLLoc:v6.00.0</version>
       </creationInfo>
@@ -42,11 +47,12 @@
           <maximumDistance>0.0751741131744</maximumDistance>
           <medianDistance>0.030874699985</medianDistance>
         </quality>
-        <comment id="smi:local/93aa18a6-1ac9-4a65-b4cd-b8349ab1bc91">
+        <comment>
             <text>Note: Depth/Latitude/Longitude errors are calculated from covariance matrix as 1D marginal (Lon/Lat errors as great circle degrees) while OriginUncertainty min/max horizontal errors are calculated from 2D error ellipsoid and are therefore seemingly higher compared to 1D errors. Error estimates can be reconstructed from the following original NonLinLoc error statistics line:
 STATISTICS ExpectX 4473.68 Y 5323.29 Z 4.59501  CovXX 0.0282621 XY -0.0053866 XZ 0.0043871 YY 0.0191034 YZ 0.00503624 ZZ 0.036713 EllAz1  206.782 Dip1  16.4026 Len1  0.227982 Az2  300.149 Dip2  11.2855 Len2  0.327468 Len3  3.709256e-01</text>
         </comment>
         <creationInfo>
+          <author>Megies LMU Munich</author>
           <creationTime>2014-10-17T16:30:08.000000Z</creationTime>
           <version>NLLoc:v6.00.0</version>
         </creationInfo>
@@ -151,7 +157,7 @@ STATISTICS ExpectX 4473.68 Y 5323.29 Z 4.59501  CovXX 0.0282621 XY -0.0053866 XZ
           <value>2010-05-27T16:56:25.930000Z</value>
           <uncertainty>0.02</uncertainty>
         </time>
-        <waveformID stationCode="UH3"></waveformID>
+        <waveformID networkCode="" stationCode="UH3"></waveformID>
         <phaseHint>P</phaseHint>
       </pick>
       <pick publicID="smi:local/3a0bde89-d7e6-45ef-a08a-4b950720f7be">
@@ -159,7 +165,7 @@ STATISTICS ExpectX 4473.68 Y 5323.29 Z 4.59501  CovXX 0.0282621 XY -0.0053866 XZ
           <value>2010-05-27T16:56:27.100000Z</value>
           <uncertainty>0.06</uncertainty>
         </time>
-        <waveformID stationCode="UH3"></waveformID>
+        <waveformID networkCode="" stationCode="UH3"></waveformID>
         <phaseHint>S</phaseHint>
       </pick>
       <pick publicID="smi:local/95492f79-0db4-4bba-a198-6c08db43dd83">
@@ -167,7 +173,7 @@ STATISTICS ExpectX 4473.68 Y 5323.29 Z 4.59501  CovXX 0.0282621 XY -0.0053866 XZ
           <value>2010-05-27T16:56:26.040000Z</value>
           <uncertainty>0.03</uncertainty>
         </time>
-        <waveformID stationCode="UH2"></waveformID>
+        <waveformID networkCode="" stationCode="UH2"></waveformID>
         <phaseHint>P</phaseHint>
       </pick>
       <pick publicID="smi:local/75ca039c-bfca-41c3-8fd3-9d70341a23fe">
@@ -175,7 +181,7 @@ STATISTICS ExpectX 4473.68 Y 5323.29 Z 4.59501  CovXX 0.0282621 XY -0.0053866 XZ
           <value>2010-05-27T16:56:27.270000Z</value>
           <uncertainty>0.06</uncertainty>
         </time>
-        <waveformID stationCode="UH2"></waveformID>
+        <waveformID networkCode="" stationCode="UH2"></waveformID>
         <phaseHint>S</phaseHint>
       </pick>
       <pick publicID="smi:local/550537fb-922c-4742-9bcc-504c1d330480">
@@ -183,7 +189,7 @@ STATISTICS ExpectX 4473.68 Y 5323.29 Z 4.59501  CovXX 0.0282621 XY -0.0053866 XZ
           <value>2010-05-27T16:56:26.130000Z</value>
           <uncertainty>0.02</uncertainty>
         </time>
-        <waveformID stationCode="UH1"></waveformID>
+        <waveformID networkCode="" stationCode="UH1"></waveformID>
         <phaseHint>P</phaseHint>
       </pick>
       <pick publicID="smi:local/0783bf9f-6862-40a3-baeb-ed247b73ca6f">
@@ -191,7 +197,7 @@ STATISTICS ExpectX 4473.68 Y 5323.29 Z 4.59501  CovXX 0.0282621 XY -0.0053866 XZ
           <value>2010-05-27T16:56:27.460000Z</value>
           <uncertainty>0.03</uncertainty>
         </time>
-        <waveformID stationCode="UH1"></waveformID>
+        <waveformID networkCode="" stationCode="UH1"></waveformID>
         <phaseHint>S</phaseHint>
       </pick>
       <pick publicID="smi:local/d6fa4a8a-6e4c-48a1-9ab9-e84b60038f4b">
@@ -199,7 +205,7 @@ STATISTICS ExpectX 4473.68 Y 5323.29 Z 4.59501  CovXX 0.0282621 XY -0.0053866 XZ
           <value>2010-05-27T16:56:26.930000Z</value>
           <uncertainty>0.06</uncertainty>
         </time>
-        <waveformID stationCode="UH4"></waveformID>
+        <waveformID networkCode="" stationCode="UH4"></waveformID>
         <phaseHint>P</phaseHint>
       </pick>
       <pick publicID="smi:local/b0b74d7c-bd9e-4183-abcb-5c784a53f8b0">
@@ -207,7 +213,7 @@ STATISTICS ExpectX 4473.68 Y 5323.29 Z 4.59501  CovXX 0.0282621 XY -0.0053866 XZ
           <value>2010-05-27T16:56:28.900000Z</value>
           <uncertainty>0.11</uncertainty>
         </time>
-        <waveformID stationCode="UH4"></waveformID>
+        <waveformID networkCode="" stationCode="UH4"></waveformID>
         <phaseHint>S</phaseHint>
       </pick>
     </event>

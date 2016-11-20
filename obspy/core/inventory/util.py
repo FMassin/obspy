@@ -823,7 +823,11 @@ def _seed_id_keyfunction(x):
     #  - three dots: full SEED ID (e.g. "IU.ANMO.10.BHZ")
     #  - more dots: sort after any of the previous, plain lexical sort
     # if no "." in the string: assume it's a network code
-    number_of_dots = x.count(".")
+
+    # split to get rid of the description that that is added to networks and
+    # stations which might also contain dots.
+    number_of_dots = x.strip().split()[0].count(".")
+
     x = x.upper()
     if number_of_dots == 0:
         x = [x] + [""] * 4
@@ -838,12 +842,19 @@ def _seed_id_keyfunction(x):
         # special comparison for component code, convert "ZNE" to integers
         # which compare less than any character
         comp = "ZNE".find(x[-1])
+        # last item is component code, either the original 1-char string, or an
+        # int from 0-2 if any of "ZNE". Python3 does not allow comparison of
+        # int and string anymore (Python 2 always compares ints smaller than
+        # any string), so we need to work around this by making this last item
+        # a tuple with first item False for ints and True for strings.
         if comp >= 0:
-            x[-1] = comp
-    # all other cases, just leave the upper case string, it will compare
-    # greater than any of the split lists
+            x[-1] = (False, comp)
+        else:
+            x[-1] = (True, x[-1])
+    # all other cases, just convert the upper case string to a single item
+    # list - it will compare greater than any of the split lists.
     else:
-        pass
+        x = [x, ]
 
     return x
 

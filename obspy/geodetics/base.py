@@ -16,6 +16,7 @@ import math
 import warnings
 
 import numpy as np
+from scipy.stats import circmean
 
 from obspy.core.util.misc import to_int_or_zero
 
@@ -260,7 +261,7 @@ def gps2dist_azimuth(lat1, lon1, lat2, lon2, a=WGS84_A, f=WGS84_F):
             raise e
 
 
-def kilometer2degrees(kilometer, radius=6371):
+def kilometers2degrees(kilometer, radius=6371):
     """
     Convenience function to convert kilometers to degrees assuming a perfectly
     spherical Earth.
@@ -274,11 +275,14 @@ def kilometer2degrees(kilometer, radius=6371):
 
     .. rubric:: Example
 
-    >>> from obspy.geodetics import kilometer2degrees
-    >>> kilometer2degrees(300)
+    >>> from obspy.geodetics import kilometers2degrees
+    >>> kilometers2degrees(300)
     2.6979648177561915
     """
     return kilometer / (2.0 * radius * math.pi / 360.0)
+
+
+kilometer2degrees = kilometers2degrees
 
 
 def degrees2kilometers(degrees, radius=6371):
@@ -343,6 +347,29 @@ def locations2degrees(lat1, long1, lat2, long2):
             math.sin(lat1) * math.sin(lat2) + math.cos(lat1) * math.cos(lat2) *
             math.cos(long_diff)))
     return gd
+
+
+def mean_longitude(longitudes):
+    """
+    Compute sample mean longitude, assuming longitude in degrees from -180 to
+    180.
+
+    >>> lons = (-170.5, -178.3, 166)
+    >>> np.mean(lons)  # doctest: +SKIP
+    -60.933
+    >>> mean_longitude(lons)  # doctest: +ELLIPSIS
+    179.08509...
+
+    :type longitudes: :class:`~numpy.ndarray` (or list, ..)
+    :param longitudes: Geographical longitude values ranging from -180 to 180
+        in degrees.
+    """
+    mean_longitude = circmean(np.array(longitudes), low=-180, high=180)
+    while mean_longitude < -180:
+        mean_longitude += 360
+    while mean_longitude > 180:
+        mean_longitude -= 360
+    return mean_longitude
 
 
 if __name__ == '__main__':
